@@ -179,6 +179,39 @@ for nn in range(len(fData)):
     plt.legend()
     plt.show()
     
+#%% Find Peaks and Integral
+
+# Find peaks
+for ii in range(len(fData)):
+    if (version[ii] >= 21):
+        for kk in range(0,numChan):
+            maxV = max(fData[ii,:,kk+4])
+            indexes = pks.indexes(fData[ii,:,kk+4], thres=maxV*.2, min_dist=1500)
+            New_indexes = indexes[fData[ii,indexes,kk+4]>.04]
+            peaks = fData[ii,New_indexes,kk+4]
+            Stats = pd.DataFrame()
+#            pData[ii,(kk-1)*3:]
+    else:
+        for kk in range(0,numChan):
+            maxV = max(fData[ii,0:int(samples[ii]),kk+1])
+            indexes[kk] = pks.indexes(fData[ii,0:int(samples[ii]),kk+1], thres=maxV*.15, min_dist=2000)
+            
+            
+#    maxV = max(V_data_filt)
+##        print(maxV)
+#    indexes = pks.indexes(V_data_filt, thres=maxV*.15, min_dist=2000)
+#    #  create the x values that correspond to voltage peaks greater than a certain threshold voltage  
+#    New_indexes= indexes[V_data_filt[indexes]>.04]
+##    print(indexes)
+##    print(time[indexes], V_data_filt[indexes])
+#    peaks = V_data_filt[New_indexes]        
+#    Peak_Data.append(peaks)
+#    plt.figure('Peak Voltages')
+#    pplot(testdata[:,0], V_data_filt, New_indexes)
+#        
+
+    
+    
     
 #%% FFT (Sam Wilding)
 for nn in range(len(fData)):
@@ -206,18 +239,3 @@ for nn in range(len(fData)):
     plt.grid()
     plt.show()
     
-#%% Find Peaks and Integral
-
-# Find peaks
-#    maxV = max(V_data_filt)
-##        print(maxV)
-#    indexes = pks.indexes(V_data_filt, thres=maxV*.15, min_dist=2000)
-#    #  create the x values that correspond to voltage peaks greater than a certain threshold voltage  
-#    New_indexes= indexes[V_data_filt[indexes]>.04]
-##    print(indexes)
-##    print(time[indexes], V_data_filt[indexes])
-#    peaks = V_data_filt[New_indexes]        
-#    Peak_Data.append(peaks)
-#    plt.figure('Peak Voltages')
-#    pplot(testdata[:,0], V_data_filt, New_indexes)
-#    
