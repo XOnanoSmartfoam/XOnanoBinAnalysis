@@ -316,7 +316,7 @@ for ii in range(len(fData)):
     # Plot the FFT of the raw signal
     if pltpks == "Y" or pltpks == "y":
 #                plt.figure('Test ' + str(ii) + ' Channel ' + str(kk))
-        print(np.shape(FFT))
+
         if(len(np.shape(FFT)) > 1):
             for ff in range(len(FFT)):
                 plt.subplot(3, 1, 1)
@@ -334,6 +334,7 @@ for ii in range(len(fData)):
         # Plot the peaks
         plt.subplot(3, 1, 3)
         plt.plot(rData[ii, ind, 0], rData[ii, ind, 1], 'r+', rData[ii, :, 0], rData[ii, :, 1])
+        plt.show()
 #                plt.xlabel('Time (sec)')
 #                plt.ylabel('Foam Response (V)')
 #                plt.suptitle('Signal Analysis - FFT and Peak Detection', size=16)
