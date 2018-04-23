@@ -11,7 +11,6 @@ import struct
 import os
 import matplotlib.pyplot as plt
 import pickle
-# from pypeaks import Data, Intervals
 from scipy.signal import butter, lfilter, filtfilt, welch, decimate
 from scipy.integrate import simps
 from DetectPeaks import detect_peaks
@@ -46,18 +45,13 @@ def find_fft(rawdata, peakindexes):
     Pwelch = []
     FFT_PkI = []
     FFT_Pfreq = []
-    #preImpact = 150
-    #postImpact = 200
-    #sampfeq = 500
     preImpact = 150
     postImpact = 750
     sampfeq = 42000
-    # Take the fft of each impact on a single channel
-    #for ff in range(len(peakindexes)):
-    #fftdata = rawdata[peakindexes[ff] - preImpact: peakindexes[ff] + postImpact]
     fftdata = rawdata
     fft_rData = fft(fftdata)
     N = len(fft_rData)
+
     #Power Spectral Analysis using Welch method
     f1, Pwelch_spec = welch(fftdata, sampfeq, nperseg=200, scaling='spectrum')
 
@@ -75,8 +69,7 @@ def find_fft(rawdata, peakindexes):
 
 # return FFT, FFT_PkI, primary_freq, xf, N
 
-# If two peaks are close together (impact peak and pick up peak),
-# removes the second peak from the array
+# If two peaks are close together (impact peak and pick up peak), removes the second peak from the array
 def remove_too_close(peakindexes):
     temp_indexes = peakindexes.tolist()
     too_close_samples = 1500
@@ -88,10 +81,6 @@ def remove_too_close(peakindexes):
             previous_index = x
     return temp_indexes
 
-
-
-
-
 ##########  Functions  ##########
 
 # Create bandpass filter function
@@ -102,7 +91,6 @@ def butter_bandpass(lowcut, highcut, fs, order):
     b, a = butter(order, [low, high], btype='band')
     return b, a
 
-
 def butter_bandpass_filter(data, lowcut, highcut, fs, order):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
     #y = lfilter(b, a, data)
@@ -110,7 +98,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order):
     return y
 
 my_data = np.genfromtxt('WeakSamples.csv', delimiter=',', dtype = 'int')
-##extract number of rows to give binlist    
+##extract number of rows to give binlist
 #print(my_data)
 numOfRows = my_data.shape[0]
 #print (numOfRows)
@@ -123,38 +111,26 @@ time = np.arange(0, 3000/42000, 1 / 42000)
 rData[:, :, 0] = time
 fData[:, :, 0] = time
 
-
-
-##FILL IN THE TABLE and convert to voltages...
-
+# FILL IN THE TABLE and convert to voltages...
 for i in range(numOfRows):
-    
-    avg = 0
-    
-    for x in range(0,500):
-        avg = my_data[i,x] + avg
-    senseZero = avg/500
-    
-    ##filter out weird points at ends of buffer?
-    my_data[i,750] = (my_data[i,749] + my_data[i,751])/2
-    my_data[i,1500] = (my_data[i,1449] + my_data[i,1501])/2
-    my_data[i,2250] = (my_data[i,2249] + my_data[i,2251])/2
-        
+
+    # avg = 0
+    # for x in range(0,500):
+    #     avg = my_data[i,x] + avg
+    # senseZero = avg/500
+    senseZero = np.mean(my_data[i,5:500])
+    my_data[i,0] = senseZero
+
+    # ##filter out weird points at ends of buffer?
+    # my_data[i,750] = (my_data[i,749] + my_data[i,751])/2
+    # my_data[i,1500] = (my_data[i,1449] + my_data[i,1501])/2
+    # my_data[i,2250] = (my_data[i,2249] + my_data[i,2251])/2
+
     rData[i, :, 1] = ((my_data[i,:]-senseZero) * (3.3/1024))
-    
+
 
 # %% Filter data
-
-# print('There are ', numChan, ' channels...')
-# ExptdChan = input('Would you like to process all of them? (Y/N): ')
-
-# if ExptdChan == "y" or ExptdChan == "Y":
 processChan = 5
-# else:
-#  processChan = input('How many channels would you like to process?: ')
-
-
-# Loop through and filter all data into fData array
 
 # Filter parameters
 fs = 42000  # Hz
@@ -163,9 +139,7 @@ highcut = 5000  # Hz
 order = 5
 
 for ll in range(len(fData)):
-    
     fData[ll, :, 1] = butter_bandpass_filter(rData[ll, :, 1], lowcut, highcut, fs, order)
-    
 
 # %% Plot data
 # Determine if we will plot data and what to plot
@@ -175,32 +149,22 @@ if plotOn == "Y" or plotOn == "y":
     plotFiltered = input('Options: Raw and Filetered signal (both), Filtered only (filtered), Raw only (raw):')
 
     for nn in range(len(fData)):
-        ##fileName = binlist[nn]
-        ##fileName = fileName[:-4]
         plt.figure()
 
-
-
         # Plot signal if decided above
-
         if plotFiltered == "both" or plotFiltered == "raw":
-            plt.plot(rData[nn, :, 0], rData[nn, :, 1])
+            plt.plot(rData[nn, :, 0], rData[nn, :, 1], label='Raw')
 
         #Plot the filtered voltage signal
         if plotFiltered == "both" or plotFiltered == "filtered":
-            plt.plot(fData[nn, :, 0], fData[nn, :, 1])
+            plt.plot(fData[nn, :, 0], fData[nn, :, 1], label='Filtered')
 
-#
         plt.title('NCF Multiple Electrode Voltage Response')
         plt.xlabel('Time (sec)')
         plt.ylabel('Response (V)')
         plt.legend()
-
-        # This makes it plot full screen
-#        figManager = plt.get_current_fig_manager()
-#        figManager.window.showMaximized()
         plt.show()
-        
+
 
 # %% Find Peaks and Integral
 
@@ -227,7 +191,7 @@ for ii in range(len(fData)):
       plt.figure('Test ' + str(ii))
 #for ii in range(12, 25):
     testPeaks = []
-    
+
     #for kk in range(0, int(processChan)):
     #maxV = max(fData[ii, 0:3000, 1])
     maxV = max(rData[ii, 0:3000, 1])
@@ -326,7 +290,7 @@ for ii in range(len(fData)):
                 plt.semilogy(f1, Pwelch[ff])
                 plt.title('Power Spectral Density')
                 plt.xlabel('Frequency (Hz)')
-    
+
                 plt.legend(['1st Impact','2nd Impact','3rd Impact','4th Impact','5th Impact'])
                 plt.xlabel('Frquency (Hz)')
                 plt.ylabel('FFT Response')
