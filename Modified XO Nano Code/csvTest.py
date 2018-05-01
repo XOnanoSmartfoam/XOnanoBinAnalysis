@@ -97,7 +97,9 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order):
     y = filtfilt(b, a, data)
     return y
 
-my_data = np.genfromtxt('WeakSamples.csv', delimiter=',', dtype = 'int')
+fname = input("What file do you want to analyze? :')
+
+my_data = np.genfromtxt(fname, delimiter=',', dtype = 'int')
 ##extract number of rows to give binlist
 #print(my_data)
 numOfRows = my_data.shape[0]
